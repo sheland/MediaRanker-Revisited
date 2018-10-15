@@ -82,7 +82,7 @@ Create advanced authorization logic to enforce rules that govern what _changes_ 
 - Do some research into how to use Google or another OAuth provider for authentication and use that provider. -->
 
 ## Due Date
-This project is due before class Monday October 29 via PR against Ada-C10/MediaRanker-Revisited.
+This project is due before class Tuesday October 30 via PR against Ada-C10/MediaRanker-Revisited.
 
 ## Resources
 - [Ada Textbook Curriculum: Controller Testing](https://github.com/Ada-Developers-Academy/textbook-curriculum/blob/master/08-rails/test-controllers.md)
