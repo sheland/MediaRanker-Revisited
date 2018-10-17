@@ -4,15 +4,33 @@ describe WorksController do
   describe "root" do
     it "succeeds with all media types" do
       # Precondition: there is at least one media of each category
-
+      # Arrange
+      # Act
+      get root_path
+      # Assert
+      must_respond_with :success
     end
 
     it "succeeds with one media type absent" do
       # Precondition: there is at least one media in two of the categories
+      # Arrange
+      work = Work.find_by(category: "book")
+      work.destroy
 
+      #action
+      get root_path
+      # Assert
+      must_respond_with :success
     end
 
     it "succeeds with no media" do
+      Work.destroy_all
+
+      #act
+      get root_path
+      # Assert
+      must_respond_with :success
+
 
     end
   end
@@ -22,23 +40,49 @@ describe WorksController do
 
   describe "index" do
     it "succeeds when there are works" do
+      #Arrange
 
+      # Act
+      get works_path
+      # Assert
+      must_respond_with :success
     end
 
     it "succeeds when there are no works" do
-
+      #Arrange
+      Work.destroy_all
+      # Act
+      get works_path
+      # Assert
+      must_respond_with :success
     end
   end
 
   describe "new" do
     it "succeeds" do
+      #Act
+      get new_work_path
 
+      #Assert
+      must_respond_with :success
     end
   end
 
   describe "create" do
     it "creates a work with valid data for a real category" do
-
+      #arrange
+      work_hash = {
+        another_album: {
+          title: "New Title"
+          creator: "Who Creates"
+          description:"This is a newer album"
+          category: "album"
+        }
+      }
+      #Act
+      expect {
+        post works_path, params: work_hash
+      }.must_change 'Work.count', 1 #change by one
     end
 
     it "renders bad_request and does not update the DB for bogus data" do
