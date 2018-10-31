@@ -1,7 +1,8 @@
 class WorksController < ApplicationController
   # We should always be able to tell what category
   # of work we're dealing with
-  before_action :category_from_work, except: [:root, :index, :new, :create]
+  before_action :category_from_work, except: [:root, :index, :new, :create] #category from work
+  skip_before_action :require_login, only: [:root] #user must be logged for all methods except for accessing root page
 
   def root
     @albums = Work.best_albums
@@ -21,6 +22,7 @@ class WorksController < ApplicationController
   def create
     @work = Work.new(media_params)
     @media_category = @work.category
+
     if @work.save
       flash[:status] = :success
       flash[:result_text] = "Successfully created #{@media_category.singularize} #{@work.id}"
@@ -37,12 +39,14 @@ class WorksController < ApplicationController
     @votes = @work.votes.order(created_at: :desc)
   end
 
-  def edit
+  def edit #user can't edit work unless logged in
   end
 
   def update
     @work.update_attributes(media_params)
+
     if @work.save
+      @media_category = @work.category
       flash[:status] = :success
       flash[:result_text] = "Successfully updated #{@media_category.singularize} #{@work.id}"
       redirect_to work_path(@work)
@@ -63,6 +67,7 @@ class WorksController < ApplicationController
 
   def upvote
     flash[:status] = :failure
+
     if @login_user
       vote = Vote.new(user: @login_user, work: @work)
       if vote.save
@@ -81,7 +86,8 @@ class WorksController < ApplicationController
     redirect_back fallback_location: work_path(@work)
   end
 
-private
+  private
+
   def media_params
     params.require(:work).permit(:title, :category, :creator, :description, :publication_year)
   end
@@ -91,4 +97,5 @@ private
     render_404 unless @work
     @media_category = @work.category.downcase.pluralize
   end
+  
 end

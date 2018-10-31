@@ -1,6 +1,5 @@
 class SessionsController < ApplicationController
-  def login_form
-  end
+  skip_before_action :require_login, only: [:create] #skips required login for creating a session
 
   def create
     auth_hash = request.env['omniauth.auth']
@@ -14,7 +13,7 @@ class SessionsController < ApplicationController
       # Attempt to create a new user
       user = User.build_from_github(auth_hash)
 
-      if user.save
+      if user.save #if user is saved
         flash[:success] = "Logged in as new user #{user.name}"
 
       else
@@ -23,8 +22,9 @@ class SessionsController < ApplicationController
         # way we've configured GitHub. Our strategy will
         # be to display error messages to make future
         # debugging easier.
+        flash[:status] = :failure
         flash[:error] = "Could not create new user account: #{user.errors.messages}"
-        redirect_to root_path
+        render "login_form", status: :bad_request
         return
       end
     end
