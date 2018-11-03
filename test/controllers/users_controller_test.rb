@@ -1,24 +1,15 @@
 require 'test_helper'
 
 describe UsersController do
-  let(:user) {users(:dan)}
+
+  let(:dan) { users(:dan) }
 
   describe "Logged In Users" do
+
     describe "index" do
       it "succeeds when there are users" do
         perform_login(dan)
         get users_path
-        must_respond_with :success
-      end
-
-      it "succeeds when there are no users" do
-        #Arrange
-        perform_login(dan)
-
-        User.destroy_all
-
-        get users_path
-
         must_respond_with :success
       end
     end
@@ -28,15 +19,17 @@ describe UsersController do
         perform_login(dan)
         get user_path(users(:dan).id)
 
-        must_respond_with :success
+        must_respond_with :ok
       end
 
-      it "renders 404 not_found for a bogus work ID" do
+      it "reponds with failure for a bogus work ID" do
         id = -1
+        perform_login(dan)
 
         get user_path(id)
 
-        must_respond_with :bad_request
+        must_respond_with :redirect
+        must_redirect_to root_path
       end
     end
   end

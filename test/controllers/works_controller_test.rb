@@ -44,8 +44,6 @@ describe WorksController do
       get root_path
       # Assert
       must_respond_with :success
-
-
     end
   end
 
@@ -125,7 +123,6 @@ describe WorksController do
           post works_path, params: work_hash
         }.wont_change "Work.count"
         must_respond_with :bad_request
-
       end
 
       it "renders 400 bad_request for bogus categories" do
@@ -148,52 +145,45 @@ describe WorksController do
           post works_path, params: work_hash
         }.wont_change "CATEGORIES.count"
         must_respond_with 400
+      end
+    end
 
+    describe "show" do
+      it "succeeds for an extant work ID" do
+        #Act
+        perform_login(dan)
 
+        get work_path(works(:poodr).id)
+
+        must_respond_with :success
       end
 
-    end
-  end
+      it "renders 404 not_found for a bogus work ID" do
+        id = -1
+        perform_login(dan)
+        get work_path(id)
+        must_respond_with :not_found
 
-  describe "show" do
-    it "succeeds for an extant work ID" do
-      #Act
-      perform_login(dan)
-
-      get work_path(works(:poodr).id)
-
-      must_respond_with :success
-
+      end
     end
 
-    it "renders 404 not_found for a bogus work ID" do
-      id = -1
+    describe "edit" do
+      it "succeeds for an extant work ID" do
+        perform_login(dan)
+        get edit_work_path(works(:poodr).id)
+        must_respond_with :success
+      end
 
-      get work_path(id)
+      it "renders 404 not_found for a bogus work ID" do
+        perform_login(dan)
 
-      must_respond_with 404
-
-    end
-  end
-
-  describe "edit" do
-    it "succeeds for an extant work ID" do
-      get edit_work_path(works(:poodr).id)
-
-
-      must_respond_with :success
+        works(:poodr).id = -21
+        get edit_work_path(works(:poodr).id)
+        must_respond_with 404
+      end
     end
 
-    it "renders 404 not_found for a bogus work ID" do
-      works(:poodr).id = -21
-
-      get edit_work_path(works(:poodr).id)
-
-      must_respond_with 404
-    end
-  end
-
-  describe "update" do
+    describe "update" do
       let (:work_hash) { {
         work: {
           title: "A title",
@@ -201,12 +191,14 @@ describe WorksController do
           description: "Wow, amazing novel",
           category: "book",
           publication_year: 2072
-            }
-          }
         }
+      }
+    }
 
       it "succeeds for valid data and an extant work ID" do
         id = works(:poodr).id
+        perform_login(dan)
+
 
         expect{
           patch work_path(id), params: work_hash
@@ -219,10 +211,13 @@ describe WorksController do
         expect(work.creator).must_equal work_hash[:work][:creator]
         expect(work.description).must_equal work_hash[:work][:description]
         expect(work.publication_year).must_equal work_hash[:work][:publication_year]
+      end
     end
 
     it "renders bad_request for bogus data" do
       work_hash[:work][:title] = nil
+      perform_login(dan)
+
 
       id = works(:poodr).id
       old_poodr = works(:poodr)
@@ -239,35 +234,38 @@ describe WorksController do
       expect(old_poodr.description).must_equal new_poodr.description
       expect(old_poodr.publication_year).must_equal new_poodr.publication_year
       expect(old_poodr.category).must_equal new_poodr.category
-
     end
 
     it "renders 404 not_found for a bogus work ID" do
       id = -1
+      perform_login(dan)
+
 
       expect {
         patch work_path(id), params: work_hash
       }.wont_change 'Work.count'
 
       must_respond_with 404
-
     end
   end
 
   describe "destroy" do
     it "succeeds for an extant work ID" do
       id = works(:poodr).id
+      perform_login(dan)
+
 
       expect {
         delete work_path(id)
       }.must_change 'Work.count', -1
       must_respond_with :redirect
       flash[:status] = :success
-
     end
 
     it "renders 404 not_found and does not update the DB for a bogus work ID" do
       id = -1
+      perform_login(dan)
+
 
       expect {
         delete work_path(id)
@@ -276,6 +274,7 @@ describe WorksController do
       must_respond_with 404
     end
   end
+
 
   describe "upvote" do
 
@@ -292,8 +291,7 @@ describe WorksController do
       delete logout_path
       expect(session[:user_id]).must_be_nil
 
-      must_redirect_to work_path(work)
-
+      must_redirect_to root_path
     end
 
     it "succeeds for a logged-in user and a fresh user-vote pair" do
@@ -310,7 +308,6 @@ describe WorksController do
 
       must_respond_with :redirect
       must_redirect_to work_path(work.id)
-
     end
 
     it "redirects to the work page if the user has already voted for that work" do
@@ -326,62 +323,63 @@ describe WorksController do
       must_respond_with :redirect
       must_redirect_to work_path(work.id)
     end
-  end
-end
 
-describe "Guest users" do
-  it "cannot access index" do
-    get works_path
-    must_redirect_to root_path
-  end
 
-  it "cannot access new" do
-    get new_work_path
+    describe "Guest users" do
+      it "cannot access index" do
+        get works_path
+        must_redirect_to root_path
+      end
 
-    must_respond_with :redirect
-    must_redirect_to root_path
-  end
+      it "cannot access new" do
+        get new_work_path
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
 
-  it "cannot access create" do
-    post works_path, params: work_hash
+      it "cannot access create" do
+        post works_path, params: work_hash
 
-    must_respond_with :redirect
-    must_redirect_to root_path
-  end
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
 
-  it "cannot access show" do
-    get work_path(works(:album).id)
+      it "cannot access show" do
+        get work_path(works(:album).id)
 
-    must_respond_with :redirect
-    must_redirect_to root_path
-  end
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
 
-  it "cannot access edit" do
-    get edit_work_path(works(:poodr).id)
+      it "cannot access edit" do
+        get edit_work_path(works(:poodr).id)
 
-    must_respond_with :redirect
-    must_redirect_to root_path
-  end
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
 
-  it "cannot access update" do
-    patch work_path(works(:poodr).id), params: work_hash
+      it "cannot access update" do
+        patch work_path(works(:poodr).id), params: work_hash
 
-    must_respond_with :redirect
-    must_redirect_to root_path
-  end
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
 
-  it "cannot access destroy" do
-    delete work_path(works(:poodr).id)
+      it "cannot access destroy" do
+        delete work_path(works(:poodr).id)
 
-    must_respond_with :redirect
-    must_redirect_to root_path
-  end
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
 
-  it "cannot access upvote" do
-    work = works(:album)
-    post upvote_path(work.id)
+      it "cannot access upvote" do
+        work = works(:album)
+        post upvote_path(work.id)
 
-    must_respond_with :redirect
-    must_redirect_to root_path
+        must_respond_with :redirect
+        must_redirect_to root_path
+      end
+
+    end
   end
 end

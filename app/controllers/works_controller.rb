@@ -36,6 +36,7 @@ class WorksController < ApplicationController
   end
 
   def show
+
     @votes = @work.votes.order(created_at: :desc)
   end
 
@@ -97,5 +98,5 @@ class WorksController < ApplicationController
     render_404 unless @work
     @media_category = @work.category.downcase.pluralize
   end
-  
+
 end

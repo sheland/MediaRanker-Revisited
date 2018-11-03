@@ -7,9 +7,9 @@ describe SessionsController do
     it "logs in an existing user" do
 
       user = users(:dan)
-        perform_login(user)
+
         expect{
-          get auth_callback_path('github')
+          perform_login(user)
 
         }.wont_change('User.count')
 
@@ -36,7 +36,7 @@ describe SessionsController do
     end
 
     it "renders the login_form if given invalid user data" do
-      user = User.new(provider: "github", uid: 2132, name: nil, email: "ada@ada.com")
+      user = User.new(provider: nil, uid: nil, name: nil, email: nil)
 
       expect {
         perform_login(user)
