@@ -83,7 +83,7 @@ describe Work do
     it "tracks the number of votes" do
       work = Work.create!(title: "test title", category: "movie")
       4.times do |i|
-        user = User.create!(name: "user#{i}")
+        user = User.create!(name: "user#{i}", email: "email", uid: "uid", provider: "provider")
         Vote.create!(user: user, work: work)
       end
       work.vote_count.must_equal 4
