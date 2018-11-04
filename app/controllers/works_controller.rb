@@ -40,7 +40,7 @@ class WorksController < ApplicationController
     @votes = @work.votes.order(created_at: :desc)
   end
 
-  def edit #user can't edit work unless logged in
+  def edit 
   end
 
   def update
